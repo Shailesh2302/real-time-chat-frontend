@@ -42,7 +42,7 @@ interface AuthStore {
   disconnectSocket: () => void;
 }
 
-const BASE_URL = "https://real-time-chat-backend-tau.vercel.app/";
+const BASE_URL = "https://real-time-chat-backend-1-87vj.onrender.com";
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   authUser: null,
