@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
+import { io, Socket } from "socket.io-client";
 
 interface AuthUser {
   _id: string;
@@ -23,6 +24,7 @@ interface LoginData {
   email: string;
   password: string;
 }
+
 interface AuthStore {
   authUser: AuthUser | null;
   isSigningUp: boolean;
@@ -34,20 +36,29 @@ interface AuthStore {
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (file: ProfilePicData) => Promise<void>;
+  onlineUsers: (string | number)[];
+  socket: Socket | null;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+const BASE_URL = "https://real-time-chat-backend-tau.vercel.app/";
+
+export const useAuthStore = create<AuthStore>((set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
+  onlineUsers: [],
+  socket: null,
 
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
 
       set({ authUser: res.data });
+      get().connectSocket();
     } catch (error) {
       console.log("Error in checkAuth: ", error);
       set({ authUser: null });
@@ -63,6 +74,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       set({ authUser: res.data });
       toast.success("Account created successfully");
+      get().connectSocket();
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -80,6 +92,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ authUser: null });
 
       toast.success("Logged out successfully");
+      get().disconnectSocket();
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -97,6 +110,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ authUser: res.data });
 
       toast.success("Loggrd in successfully");
+
+      get().connectSocket();
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -124,5 +139,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
     } finally {
       set({ isUpdatingProfile: false });
     }
+  },
+
+  connectSocket: () => {
+    const { authUser } = get();
+
+    if (!authUser || get().socket?.connected) return;
+
+    const socket = io(BASE_URL, {
+      query: {
+        userId: authUser._id,
+      },
+    });
+    socket.connect();
+    set({ socket: socket });
+
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    if (get().socket?.connected) get().socket?.disconnect();
   },
 }));

@@ -97,7 +97,7 @@ export default function AuthImagePattern({
   };
 
   return (
-    <div className="bg-base-200 flex min-h-screen items-center justify-center p-6">
+    <div className="hidden lg:flex bg-base-200  min-h-screen items-center justify-center p-6">
       <div className="animate-fadeIn w-full max-w-md text-center">
         {/* Board */}
         <div className="mb-8 flex justify-center">

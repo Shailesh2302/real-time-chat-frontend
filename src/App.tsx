@@ -12,8 +12,11 @@ import { useThemeStore } from "./store/useThemeStore";
 // import { Loader } from "lucide-react";
 
 function App() {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
+
+  console.log("online Users: ", { onlineUsers });
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);

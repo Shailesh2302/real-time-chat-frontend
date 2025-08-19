@@ -36,12 +36,12 @@ const SignUpPage = () => {
     return true;
   };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     const success = validateForm();
 
-    if (success === true) signup(formData);
+    if (success === true) await signup(formData);
   };
 
   return (
@@ -122,7 +122,7 @@ const SignUpPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   className="input input-bordered focus:border-primary focus:ring-primary/50 w-full border-zinc-700 bg-zinc-900/70 pl-12 text-gray-100 transition-all placeholder:text-zinc-500 focus:ring-2"
-                  placeholder="••••••••"
+                  placeholder="********"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
